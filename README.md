@@ -1,1 +1,0 @@
-# aws-practitioner-shop-BE
