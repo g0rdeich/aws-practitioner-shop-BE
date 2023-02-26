@@ -13,7 +13,7 @@ export default {
 						description: 'Success',
 						bodyType: 'Products'
 					},
-					502: {
+					500: {
 						description: 'Server error'
 					}
 				}

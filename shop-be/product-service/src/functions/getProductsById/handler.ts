@@ -21,7 +21,7 @@ const getProductsList = async (event) => {
 		return formatJSONResponse(response);
 	} catch (err) {
 		return {
-			statusCode: 502,
+			statusCode: 500,
 			message: 'Internal server error'
 		}
 	}

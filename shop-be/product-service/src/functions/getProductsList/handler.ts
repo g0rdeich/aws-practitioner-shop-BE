@@ -13,7 +13,7 @@ const getProductsList = async () => {
 		});
 	} catch (err) {
 		return {
-			statusCode: 502,
+			statusCode: 500,
 			message: 'Internal server error'
 		}
 	}	
