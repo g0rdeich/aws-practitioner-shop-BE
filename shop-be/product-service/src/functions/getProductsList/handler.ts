@@ -1,11 +1,23 @@
-import { formatJSONResponse } from '@libs/api-gateway';
-import productsMock from '../../../productsMock/productsMock';
+import {formatJSONResponse} from '@libs/api-gateway';
+import * as AWS from 'aws-sdk';
+import {tableNames} from '../../../config';
+import {get} from 'lodash';
 
-const getProductsList = async () => {
+const client = new AWS.DynamoDB.DocumentClient();
+
+const getProductsList = async (event) => {
 	try {
-		// imitation of DB query to get all products
-		const products = await new Promise((res) => {
-			setTimeout(() => res(productsMock), 10);
+		console.log('event: ', event);
+		const productsTableResponse = await client.scan({TableName: tableNames.productsTable}).promise();
+		const stocksTableResponse = await client.scan({TableName: tableNames.stocksTable}).promise();
+		console.log('prod: ', productsTableResponse);
+		console.log('stock: ', stocksTableResponse);
+		const products = productsTableResponse.Items.map((product) => {
+			const stockInfo = stocksTableResponse.Items.find(stock => stock.product_id === product.id);
+			return {
+				...product,
+				count: get(stockInfo, 'count', 0) // in case if stockInfo is not found for some reason
+			}
 		});
 		return formatJSONResponse({
 			statusCode: 200,
