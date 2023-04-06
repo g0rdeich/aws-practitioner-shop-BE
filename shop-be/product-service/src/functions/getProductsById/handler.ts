@@ -1,24 +1,41 @@
-import { formatJSONResponse } from '@libs/api-gateway';
-import productsMock from '../../../productsMock/productsMock';
+import {formatJSONResponse} from '@libs/api-gateway';
+import * as AWS from 'aws-sdk';
+import {tableNames} from '../../../config';
+import {get} from 'lodash';
+
+const client = new AWS.DynamoDB.DocumentClient();
 
 const getProductsList = async (event) => {
 	try {
-		const requiredProductId = JSON.parse(event.pathParameters.productId);
-		// imitation of DB query to get one product
-		const product = await new Promise((res) => {
-			setTimeout(() => {
-				const productFromPromise = productsMock.find(product => product.id === requiredProductId) || null;
-				res(productFromPromise);
-			}, 10);
-		});
-		const response = product ? {
-			statusCode: 200,
-			product
-		} : {
-			statusCode: 404,
-			message: `Product with productId #${requiredProductId} is not found`
+		console.log('event: ', event);
+		const requiredProductId = event.pathParameters.productId;
+		const productsTableResponse = await client.get({
+			TableName: tableNames.productsTable,
+			Key: {
+				id: requiredProductId
+			}
+		}).promise();
+		const stocksTableResponse = await client.get({
+			TableName: tableNames.stocksTable,
+			Key: {
+				product_id: requiredProductId
+			}
+		}).promise();
+
+		if (!productsTableResponse.Item) {
+			return formatJSONResponse({
+				statusCode: 404,
+				message: `Product with productId #${requiredProductId} is not found`
+			})
 		}
-		return formatJSONResponse(response);
+
+		return formatJSONResponse({
+			statusCode: 200,
+			product: {
+				...productsTableResponse.Item,
+				count: get(stocksTableResponse, 'Item.count', 0) // in case stock info is not found
+			}
+		});
 	} catch (err) {
 		return {
 			statusCode: 500,

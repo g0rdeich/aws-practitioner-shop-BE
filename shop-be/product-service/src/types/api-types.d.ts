@@ -1,8 +1,9 @@
 export type Product = {
-	id: number,
+	id: string,
 	title: string,
 	description: string,
-	price: number
+	price: number,
+	count: number
 };
 
 export type Products = Product[];
