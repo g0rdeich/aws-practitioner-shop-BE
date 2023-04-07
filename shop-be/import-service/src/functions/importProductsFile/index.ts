@@ -1,4 +1,5 @@
 import { handlerPath } from '@libs/handler-resolver';
+import config from '../../../config';
 
 export default {
 	handler: `${handlerPath(__dirname)}/handler.main`,
@@ -8,6 +9,7 @@ export default {
 				method: 'get',
 				path: 'import',
 				cors: true,
+				authorizer: config.authorizer.basic,
 				responses: {
 					200: {
 						description: 'Success',
@@ -19,5 +21,5 @@ export default {
 				}
 			},
 		},
-	],
+	]
 };
