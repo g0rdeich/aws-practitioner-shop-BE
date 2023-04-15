@@ -6,6 +6,7 @@ const csv = require('csv-parser');
 const importProductsFile = async (event) => {
 	const {region, s3Bucket} = config;
 	const s3Client = new AWS.S3({region});
+	const sqsClient = new AWS.SQS();
 
 	for (const record of event.Records) {
 		const params = {
@@ -20,7 +21,13 @@ const importProductsFile = async (event) => {
 				s3Stream
 					.pipe(csv())
 					.on('data', data => {
-						console.log('data: ', data)
+						const message = JSON.stringify(data);
+						sqsClient.sendMessage({
+							QueueUrl: config.sqs.catalogItemsQueue.url,
+							MessageBody: message
+						}, () => {
+							console.log('sent following sqs message: ', message);
+						})						
 					})
 					.on('error', err => {
 						reject(err);

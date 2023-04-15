@@ -7,5 +7,11 @@ export default {
 			parsed: 'parsed'
 		},
 		expires: 60
+	},
+	sqs: {
+		catalogItemsQueue: {
+			url: 'https://sqs.eu-west-1.amazonaws.com/633356132469/catalogItemsQueue',
+			arn: 'arn:aws:sqs:eu-west-1:633356132469:catalogItemsQueue'
+		}
 	}
 };
